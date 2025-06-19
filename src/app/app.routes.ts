@@ -1,3 +1,4 @@
+/**app.routes.ts */
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
@@ -9,6 +10,11 @@ export const routes: Routes = [
   {
     path: 'user',
     loadChildren: () => import('./pages/user/user-routing-module').then(m => m.UserRoutingModule)
+  },
+  {
+  path: 'admin',
+  loadChildren: () =>
+    import('./pages/admin/admin.routes').then(m => m.adminRoutes)
   },
   { path: '**', redirectTo: 'auth/login' }
 ];

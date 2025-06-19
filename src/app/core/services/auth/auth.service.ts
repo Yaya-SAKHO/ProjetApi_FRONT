@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { ApiService } from '../api.service';
 import { AuthStorageService } from '../storage/auth-storage.service';
 import { JwtUtils } from '../../utils/token/jwt.utils';
@@ -7,6 +7,7 @@ import { User } from '../../models/user/user-profil.model';
 import { ApiResponse } from '../../api/ApiResponse';
 import { AuthResponse } from '../../models/auth/auth-response.models';
 import { API_ENDPOINTS } from '../../constants/api-endpoints.constants';
+import { Router } from '@angular/router';
 
 
 @Injectable({ providedIn: 'root' })
@@ -15,24 +16,32 @@ export class AuthService {
 
   constructor(
     private api: ApiService,
-    private authStorage: AuthStorageService
+    private authStorage: AuthStorageService,
+    private router : Router
   ) {
     this.initializeCurrentUser();
   }
 
-register(userData: { name: string; email: string; password: string; role?: string }): Observable<ApiResponse<AuthResponse>> {
+  register(userData: { name: string; email: string; password: string; role?: string }): Observable<ApiResponse<AuthResponse>> {
     const payload = {
       ...userData,
       role: userData.role || 'user'
     };
-
+  
     return this.api.post<AuthResponse>(API_ENDPOINTS.AUTH.REGISTER, payload, false).pipe(
       tap({
         next: (response) => {
-          if (response.Data?.accessToken) {
-            this.handleAuthentication(response.Data.accessToken);
+          if (response.Data?.accessToken && response.Data?.user) {
+            const rawUser = response.Data.user;
+            const user: User = {
+              id: rawUser.id,
+              email: rawUser.email,
+              name: rawUser.name,
+              role: rawUser.role
+            };
+            this.handleAuthentication(response.Data.accessToken, user);
           } else {
-            throw new Error('No access token received');
+            throw new Error('Données utilisateur manquantes dans la réponse');
           }
         },
         error: (error) => console.error('Registration error:', error)
@@ -40,21 +49,28 @@ register(userData: { name: string; email: string; password: string; role?: strin
     );
   }
 
-
- login(credentials: { email: string; password: string }): Observable<ApiResponse<AuthResponse>> {
+  login(credentials: { email: string; password: string }): Observable<ApiResponse<AuthResponse>> {
     return this.api.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials, false).pipe(
       tap({
         next: (response) => {
-          if (response.Data?.accessToken) {
-            this.handleAuthentication(response.Data.accessToken);
+          if (response.Data?.accessToken && response.Data?.user) {
+            const rawUser = response.Data.user;
+            const user: User = {
+              id: rawUser.id,
+              email: rawUser.email,
+              name: rawUser.name,
+              role: rawUser.role
+            };
+            this.handleAuthentication(response.Data.accessToken, user);
           } else {
-            throw new Error('No access token received');
+            throw new Error('Données utilisateur manquantes dans la réponse');
           }
         },
         error: (error) => console.error('Login error:', error)
       })
     );
   }
+  
 
   get currentUser$(): Observable<User | null> {
     return this.currentUserSubject.asObservable();
@@ -65,31 +81,20 @@ register(userData: { name: string; email: string; password: string; role?: strin
     this.currentUserSubject.next(null);
   }
 
-  private handleAuthentication(token: string): void {
+  private handleAuthentication(token: string, user: User): void {
     if (!token) {
       throw new Error('No token received');
     }
-
-    const decoded = JwtUtils.decodeToken(token);
-    if (!decoded) {
-      throw new Error('Invalid token');
-    }
-
-    const userData: User = {
-      id: decoded.userId,
-      email: decoded.email,
-      name: decoded.name,
-      role: decoded.role || 'user'
-    };
-
+  
     this.authStorage.saveAuthData(
       token,
-      userData.role,
-      [userData.role]
+      user.role,
+      [user.role]
     );
-
-    this.currentUserSubject.next(userData);
+  
+    this.currentUserSubject.next(user);
   }
+  
 
   private initializeCurrentUser(): void {
     try {
@@ -103,7 +108,7 @@ register(userData: { name: string; email: string; password: string; role?: strin
             id: decoded.userId,
             email: decoded.email,
             name: decoded.name,
-            role: decoded.role || 'user'
+            role: decoded.role || 'user',
           });
         }
       }

@@ -57,12 +57,14 @@ export class LoginPage {
       next: (response: ApiResponse<any>) => {
         this.isLoading = false;
         if (response.Success) {
-          if(response.Data.user.role ==='admin')
-          this.router.navigate(['/']); 
-        else {
-          console.log("je suis la oub pas")
-          this.router.navigate(['/user']);
-        }
+          if(response.Data.user.role ==='admin'){
+            console.log("je suis admin");
+            this.router.navigate(['/admin']);
+          }
+            else {
+              console.log("je suis la oub pas")
+              this.router.navigate(['/user']);
+            }
         } else {
           this.errorMessage = response.Error?.message || 'Une erreur est survenue lors de la connexion';
         }

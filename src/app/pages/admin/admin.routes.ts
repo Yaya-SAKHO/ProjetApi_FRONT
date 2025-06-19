@@ -5,7 +5,7 @@ import { adminGuard } from '../../core/guards/admin/admin.guard';
 export const adminRoutes: Routes = [
   {
     path: '',
-    canActivate: [authGuard, adminGuard],
+    //canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./layout/admin-layout').then(m => m.AdminLayout),
     children: [
