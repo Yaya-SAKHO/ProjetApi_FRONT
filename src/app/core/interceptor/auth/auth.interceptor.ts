@@ -28,19 +28,6 @@ export class AuthInterceptor implements HttpInterceptor {
         return next.handle(request);
       })
     );
-
-    // Solution alternative 2 (si vous préférez garder from()):
-    // const authData = this.authStorage.getAuthData();
-    // return from(authData ? [authData] : []).pipe(
-    //   switchMap(data => {
-    //     if (data?.token) {
-    //       request = request.clone({
-    //         setHeaders: { Authorization: `Bearer ${data.token}` }
-    //       });
-    //     }
-    //     return next.handle(request);
-    //   })
-    // );
   }
 
   private isPublicRequest(request: HttpRequest<any>): boolean {

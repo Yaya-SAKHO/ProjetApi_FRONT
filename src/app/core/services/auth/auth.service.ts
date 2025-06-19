@@ -5,7 +5,8 @@ import { AuthStorageService } from '../storage/auth-storage.service';
 import { JwtUtils } from '../../utils/token/jwt.utils';
 import { User } from '../../models/user/user-profil.model';
 import { ApiResponse } from '../../api/ApiResponse';
-import { AuthResponse } from '../../models/auth/auth-respinse.models';
+import { AuthResponse } from '../../models/auth/auth-response.models';
+import { API_ENDPOINTS } from '../../constants/api-endpoints.constants';
 
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +26,7 @@ register(userData: { name: string; email: string; password: string; role?: strin
       role: userData.role || 'user'
     };
 
-    return this.api.post<AuthResponse>('/auth/register', payload, false).pipe(
+    return this.api.post<AuthResponse>(API_ENDPOINTS.AUTH.REGISTER, payload, false).pipe(
       tap({
         next: (response) => {
           if (response.Data?.accessToken) {
@@ -41,7 +42,7 @@ register(userData: { name: string; email: string; password: string; role?: strin
 
 
  login(credentials: { email: string; password: string }): Observable<ApiResponse<AuthResponse>> {
-    return this.api.post<AuthResponse>('/auth/login', credentials, false).pipe(
+    return this.api.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials, false).pipe(
       tap({
         next: (response) => {
           if (response.Data?.accessToken) {
