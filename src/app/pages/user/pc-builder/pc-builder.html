@@ -1,0 +1,51 @@
+<!-- <h2>Configurer mon PC</h2>
+
+<div *ngIf="isLoading">
+  <p>Chargement des composants...</p>
+</div>
+
+
+<div *ngIf="!isLoading">
+  <ng-container *ngFor="let category of categories">
+    <mat-card style="margin-bottom: 16px;">
+      <h3>{{ category }}</h3>
+
+      <mat-form-field appearance="fill" style="width: 100%;">
+        <mat-select
+          [(ngModel)]="selectedComponents[category]"
+          placeholder="Choisir un composant"
+        >
+          <mat-option
+            *ngFor="let comp of getComponentsByCategory(category)"
+            [value]="comp"
+          >
+            {{ comp.name }} - {{ comp.price || 0 }} €
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+     
+      <div *ngIf="selectedComponents[category] as selected">
+        <p><strong>Marque :</strong> {{ selected.brand }}</p>
+
+        <p *ngFor="let specKey of objectKeys(selected.specs || {})">
+          <strong>{{ specKey }} :</strong> {{ selected.specs[specKey] }}
+        </p>
+
+        <img
+          *ngIf="selected.image?.data"
+          [src]="'data:' + selected.image.contentType + ';base64,' + selected.image.data"
+          alt="{{ selected.name }}"
+          width="150"
+        />
+      </div>
+    </mat-card>
+  </ng-container>
+
+  <mat-card class="mt-4">
+    <h3>Total : {{ getTotal() }} €</h3>
+    <button mat-raised-button color="primary" (click)="saveConfiguration()">
+      Sauvegarder ma configuration
+    </button>
+  </mat-card>
+</div> -->
