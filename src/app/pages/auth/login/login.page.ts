@@ -57,8 +57,12 @@ export class LoginPage {
       next: (response: ApiResponse<any>) => {
         this.isLoading = false;
         if (response.Success) {
-          console.log("connexion reucui")
+          if(response.Data.user.role ==='admin')
           this.router.navigate(['/']); 
+        else {
+          console.log("je suis la oub pas")
+          this.router.navigate(['/user']);
+        }
         } else {
           this.errorMessage = response.Error?.message || 'Une erreur est survenue lors de la connexion';
         }
