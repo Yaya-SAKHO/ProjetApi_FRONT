@@ -84,7 +84,8 @@
                   <div class="flex-shrink-0 h-10 w-10">
                     <img *ngIf="component.image" 
                     [src]="component.image" 
-                    class="h-10 w-10 rounded-md object-contain">
+                    class="h-10 w-10 rounded-md object-contain"
+                    [alt]="component.name">
                   </div>
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900">{{ component.name }}</div>
@@ -93,7 +94,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">
-                  {{ typeof component.category === 'string' ? component.category : component.category.name }}
+                    {{ getComponentCategory(component) }}
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -101,8 +102,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">
-                  <!-- Afficher le prix minimum -->
-                  {{ getComponentPrice(component._id) | currency:'EUR':'symbol':'1.2-2' }}
+                    {{ getComponentPrice(component) | currency:'EUR':'symbol':'1.2-2' }}
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -9,6 +9,8 @@ import { ConfigurationService } from '../../../../core/services/configurations/c
 import { ApiResponse } from '../../../../core/api/ApiResponse';
 import { PriceService } from '../../../../core/services/price/price.service';
 import { ComponentService } from '../../../../core/services/composants/composants.service';
+import { Category } from '../../../../core/models/category/category.model';
+import { UserService } from '../../../../core/services/utilisateurs/utilisateurs';
 
 @Component({
   selector: 'app-configuration-detail',
@@ -28,7 +30,8 @@ export class ConfigurationDetail implements OnInit {
     private route: ActivatedRoute,
     private configService: ConfigurationService,
     private componentService: ComponentService,
-    private priceService: PriceService
+    private priceService: PriceService,
+    private userService: UserService 
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +49,8 @@ export class ConfigurationDetail implements OnInit {
       next: (response: ApiResponse<Configuration>) => {
         this.configuration = response.Data || null;
         if (this.configuration) {
-          this.loadComponentDetails(); // ❌ ne pas appeler calculateCostBreakdown ici
+          this.loadComponentDetails();
+          this.loadUserDetails();
         }
       },
       error: (err) => {
@@ -56,23 +60,44 @@ export class ConfigurationDetail implements OnInit {
     });
   }
 
+  loadUserDetails(): void {
+    if (!this.configuration) return;
+    
+    if (typeof this.configuration.user !== 'string') {
+      this.userDetails = this.configuration.user;
+      return;
+    }
+    this.userService.getUserById(this.configuration.user).subscribe({
+      next: (response: ApiResponse<User>) => {
+        this.userDetails = response.Data || null;
+        if (this.configuration && this.userDetails) {
+          this.configuration.user = this.userDetails;
+        }
+      },
+      error: (err) => console.error('Erreur chargement utilisateur', err)
+    });
+  }
+  
   loadComponentDetails(): void {
     if (!this.configuration) return;
-
-    const componentIds = this.configuration.components.map(c =>
+  
+    const componentIds = this.configuration.components.map(c => 
       typeof c === 'string' ? c : c._id
     );
-
+  
     forkJoin(
       componentIds.map(id => this.componentService.getComponentDetails(id))
     ).subscribe({
-      next: (responses: ApiResponse<PcComponent>[]) => {
-        this.componentDetails = responses.map(r => r.Data!);
-        this.calculateCostBreakdown(); // ✅ on l'appelle ici
+      next: (responses: ApiResponse<any>[]) => {
+        this.componentDetails = responses.map(r => r.Data?.component || r.Data);
+        console.log('Processed components:', this.componentDetails); 
+        this.calculateCostBreakdown();
       },
       error: (err) => console.error('Erreur chargement composants', err)
     });
   }
+
+
 
   calculateCostBreakdown(): void {
     if (!this.configuration) return;
@@ -111,6 +136,24 @@ export class ConfigurationDetail implements OnInit {
     });
   }
 
+  getComponentCategory(component: any): string {
+    if (!component) return '';
+    if (component.component && component.component.category) {
+      return component.component.category.name;
+    }
+    if (component.category) {
+      return typeof component.category === 'string' ? component.category : component.category.name;
+    }
+    return '';
+  }
+
+  getComponentPrice(component: any): number {
+    if (!component?.component?.prices || component.component.prices.length === 0) {
+      return 0;
+    }
+    return Math.min(...component.component.prices.map((p: any) => p.price));
+  }
+
   exportToPdf(): void {
     if (!this.configuration) return;
 
@@ -144,10 +187,5 @@ export class ConfigurationDetail implements OnInit {
     });
   }
 
-  getComponentPrice(componentId: string): number {
-    const component = this.componentDetails.find(c => c._id === componentId);
-    if (!component || !component.prices || component.prices.length === 0) return 0;
 
-    return Math.min(...component.prices.map(p => p.price));
-  }
 }
