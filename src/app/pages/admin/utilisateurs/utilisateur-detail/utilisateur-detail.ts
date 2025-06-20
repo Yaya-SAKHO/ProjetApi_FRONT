@@ -1,15 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
-import { Configuration } from '../../../../core/models/configuration/configuration.model';
-import { User } from '../../../../core/models/user/user-profil.model';
-import { UsersService } from '../../../../core/services/utilisateurs/utilisateurs';
+import { finalize } from 'rxjs';
+import { Configuration } from '../../../../core/models/admin/configuration/configuration.model';
+import { User } from '../../../../core/models/admin/user/user.model';
+import { ConfigurationService } from '../../../../core/services/admin/configurations/configuration.service';
+import { UserService } from '../../../../core/services/admin/utilisateurs/utilisateurs';
 import { ApiResponse } from '../../../../core/api/ApiResponse';
-import { ConfigurationsService } from '../../../../core/services/configurations/configurations';
-
 
 @Component({
   selector: 'app-utilisateur-detail',
@@ -21,74 +20,67 @@ import { ConfigurationsService } from '../../../../core/services/configurations/
 export class UtilisateurDetail implements OnInit {
   user: User | null = null;
   configurations: Configuration[] = [];
-  isLoading = true;
   activeTab = 'configurations';
+  isLoading = true;
 
   constructor(
     private route: ActivatedRoute,
-    private usersService: UsersService,
-    private configurationsService: ConfigurationsService
+    private userService: UserService,
+    private configService: ConfigurationService
   ) {}
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');
+    console.log('User ID from route:', userId);
     if (userId) {
       this.loadUser(userId);
-      this.loadUserConfigurations(userId);
     }
   }
 
   loadUser(userId: string): void {
-    this.usersService.getUser(userId).subscribe({
+    this.userService.getUserById(userId).subscribe({
       next: (response: ApiResponse<User>) => {
-        if (response.Success && response.Data) {
-          this.user = response.Data;
+        this.user = response.Data || null;
+        if (this.user?.email) {
+          this.loadUserConfigurations(this.user.email);
         }
       },
-      error: (error: any) => console.error('Erreur:', error)
+      error: (err) => console.error('Erreur chargement utilisateur', err)
     });
   }
 
-  loadUserConfigurations(userId: string): void {
-    this.configurationsService.getUserConfigurations(userId).subscribe({
+  loadUserConfigurations(email: string): void {
+    this.isLoading = true;
+    this.configService.getConfigurationsByUser(email).pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
       next: (response: ApiResponse<Configuration[]>) => {
-        if (response.Success && response.Data) {
-          this.configurations = response.Data;
-        }
-        this.isLoading = false;
+        this.configurations = response.Data || [];
       },
-      error: (error: any) => {
-        console.error('Erreur:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  promoteToAdmin(user: User): void {
-    if (confirm(`Promouvoir ${user.name} en administrateur?`)) {
-      this.usersService.promoteToAdmin(user.id).subscribe({
-        next: () => {
-          if (this.user) this.user.role = 'admin';
-        },
-        error: (error: any) => console.error('Erreur:', error)
-      });
-    }
-  }
-
-  toggleUserStatus(user: User): void {
-    const action = user.isActive 
-      ? this.usersService.banUser(user.id)
-      : this.usersService.activateUser(user.id);
-
-    action.subscribe({
-      next: () => {
-        if (this.user) this.user.isActive = !this.user.isActive;
-      },
-      error: (error: any) => console.error('Erreur:', error)
+      error: (err) => console.error('Erreur chargement configurations', err)
     });
   }
 
   changeTab(tab: string): void {
     this.activeTab = tab;
+  }
+
+  promoteToAdmin(user: User): void {
+    this.userService.updateUserRole(user._id, 'admin').subscribe({
+      next: () => {
+        if (this.user) this.user.role = 'admin';
+      },
+      error: (err) => console.error('Erreur promotion admin', err)
+    });
+  }
+
+  toggleUserStatus(user: User): void {
+    const newStatus = !user.isActive;
+    this.userService.toggleUserStatus(user._id, newStatus).subscribe({
+      next: () => {
+        if (this.user) this.user.isActive = newStatus;
+      },
+      error: (err) => console.error('Erreur changement statut', err)
+    });
   }
 }

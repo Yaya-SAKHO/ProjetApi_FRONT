@@ -27,9 +27,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <div class="flex-shrink-0 h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
-              <span class="text-indigo-600 text-2xl font-bold">
-                {{ user.name | initials }}
-              </span>
+              <span class="text-indigo-600 text-2xl font-bold">{{ user.name | initials }}</span>
             </div>
             <div class="ml-4">
               <h3 class="text-lg leading-6 font-medium text-gray-900">{{ user.name }}</h3>
@@ -47,28 +45,24 @@
                     'bg-green-100 text-green-800': user.isActive,
                     'bg-red-100 text-red-800': !user.isActive
                   }">
-                  {{ user.isActive ? 'Actif' : 'Banni' }}
+                  {{ user.isActive ? 'Actif' : 'Inactif' }}
                 </span>
               </p>
             </div>
           </div>
           <div class="flex space-x-3">
-            <button
-              *ngIf="user.role === 'user'"
+            <button *ngIf="user.role === 'user'"
               (click)="promoteToAdmin(user)"
-              class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
+              class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               Promouvoir admin
             </button>
-            <button
-              (click)="toggleUserStatus(user)"
+            <button (click)="toggleUserStatus(user)"
               [class.bg-green-600]="!user.isActive"
               [class.bg-red-600]="user.isActive"
               class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
               [class.focus:ring-green-500]="!user.isActive"
-              [class.focus:ring-red-500]="user.isActive"
-            >
-              {{ user.isActive ? 'Bannir' : 'Activer' }}
+              [class.focus:ring-red-500]="user.isActive">
+              {{ user.isActive ? 'Désactiver' : 'Activer' }}
             </button>
           </div>
         </div>
@@ -90,22 +84,22 @@
     <!-- Tabs -->
     <div class="border-b border-gray-200 mb-6">
       <nav class="-mb-px flex space-x-8">
-        <button
-          (click)="changeTab('configurations')"
-          [class.border-indigo-500 text-indigo-600]="activeTab === 'configurations'"
-          [class.border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300]="activeTab !== 'configurations'"
-          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-        >
-          Configurations
-        </button>
-        <button
-          (click)="changeTab('activity')"
-          [class.border-indigo-500 text-indigo-600]="activeTab === 'activity'"
-          [class.border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300]="activeTab !== 'activity'"
-          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-        >
-          Activité
-        </button>
+        <button (click)="changeTab('configurations')"
+        [ngClass]="{
+          'border-indigo-500 text-indigo-600': activeTab === 'configurations',
+          'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'configurations'
+        }"
+        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+        Configurations
+      </button>
+      <button (click)="changeTab('activity')"
+      [ngClass]="{
+        'border-indigo-500 text-indigo-600': activeTab === 'activity',
+        'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'activity'
+      }"
+      class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+      Activité
+    </button>
       </nav>
     </div>
   
@@ -128,7 +122,7 @@
       <div *ngIf="!isLoading && configurations.length > 0" class="bg-white shadow overflow-hidden sm:rounded-md">
         <ul class="divide-y divide-gray-200">
           <li *ngFor="let config of configurations">
-            <a [routerLink]="['/admin/configurations', config.id]" class="block hover:bg-gray-50">
+            <a [routerLink]="['/admin/configurations', config._id]" class="block hover:bg-gray-50">
               <div class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
                   <p class="text-sm font-medium text-indigo-600 truncate">{{ config.name }}</p>
@@ -145,6 +139,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       Créée le {{ config.createdAt | date: 'dd/MM/yyyy' }}
+                    </p>
+                  </div>
+                  <div class="mt-2 sm:mt-0 sm:ml-4">
+                    <p class="text-sm text-gray-900 font-medium">
+                      Coût total: {{ config.totalCost | currency:'EUR':'symbol':'1.2-2' }}
                     </p>
                   </div>
                 </div>

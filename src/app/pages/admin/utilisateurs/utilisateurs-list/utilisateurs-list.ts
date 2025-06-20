@@ -1,28 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { User } from '../../../../core/models/user/user-profil.model';
-import { UsersService } from '../../../../core/services/utilisateurs/utilisateurs';
-import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
-import { finalize } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
+import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
+import { User } from '../../../../core/models/admin/user/user.model';
+import { UserService } from '../../../../core/services/admin/utilisateurs/utilisateurs';
+import { ApiResponse } from '../../../../core/api/ApiResponse';
 
 @Component({
   selector: 'app-utilisateurs-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, InitialsPipe, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, InitialsPipe],
   templateUrl: './utilisateurs-list.html',
   styleUrls: ['./utilisateurs-list.css']
 })
 export class UtilisateursList implements OnInit {
-  users: User[] = [];
   isLoading = true;
+  users: User[] = [];
+  filteredUsers: User[] = [];
   searchTerm = '';
   currentPage = 1;
   itemsPerPage = 10;
-  totalItems = 0;
 
-  constructor(private usersService: UsersService) {}
+  constructor(private userService: UserService) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -30,48 +31,15 @@ export class UtilisateursList implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
-    this.usersService.getUsers()
-      .pipe(finalize(() => this.isLoading = false))
-      .subscribe({
-        next: (response) => {
-          if (response.Success && response.Data) {
-            this.users = response.Data;
-            this.totalItems = this.users.length;
-          }
-        },
-        error: (error) => console.error('Erreur:', error)
-      });
-  }
-
-  toggleUserStatus(user: User): void {
-    const action = user.isActive 
-      ? this.usersService.banUser(user.id)
-      : this.usersService.activateUser(user.id);
-
-    action.subscribe({
-      next: () => {
-        user.isActive = !user.isActive;
+    this.userService.getUsers().pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (response: ApiResponse<User[]>) => {
+        this.users = response.Data || [];
+        this.filteredUsers = [...this.users];
       },
-      error: (error) => console.error('Erreur:', error)
+      error: (err) => console.error('Erreur chargement utilisateurs', err)
     });
-  }
-
-  promoteToAdmin(user: User): void {
-    if (confirm(`Promouvoir ${user.name} en administrateur?`)) {
-      this.usersService.promoteToAdmin(user.id).subscribe({
-        next: () => {
-          user.role = 'admin';
-        },
-        error: (error) => console.error('Erreur:', error)
-      });
-    }
-  }
-
-  get filteredUsers(): User[] {
-    return this.users.filter(user =>
-      user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
   }
 
   get paginatedUsers(): User[] {
@@ -79,14 +47,47 @@ export class UtilisateursList implements OnInit {
     return this.filteredUsers.slice(start, start + this.itemsPerPage);
   }
 
+  filterUsers(): void {
+    if (!this.searchTerm) {
+      this.filteredUsers = [...this.users];
+      return;
+    }
+
+    const term = this.searchTerm.toLowerCase();
+    this.filteredUsers = this.users.filter(user => 
+      user.name.toLowerCase().includes(term) || 
+      user.email.toLowerCase().includes(term)
+    );
+    this.currentPage = 1;
+  }
+
+  promoteToAdmin(user: User): void {
+    this.userService.updateUserRole(user._id, 'admin').subscribe({
+      next: () => {
+        user.role = 'admin';
+      },
+      error: (err) => console.error('Erreur promotion admin', err)
+    });
+  }
+
+  toggleUserStatus(user: User): void {
+    const newStatus = !user.isActive;
+    this.userService.toggleUserStatus(user._id, newStatus).subscribe({
+      next: () => {
+        user.isActive = newStatus;
+      },
+      error: (err) => console.error('Erreur changement statut', err)
+    });
+  }
+
   getDisplayRange(): { start: number, end: number } {
     const start = (this.currentPage - 1) * this.itemsPerPage + 1;
     const end = Math.min(this.currentPage * this.itemsPerPage, this.filteredUsers.length);
     return { start, end };
   }
-  
+
   getPageNumbers(): number[] {
-    const pageCount = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
-    return Array.from({ length: pageCount }, (_, i) => i + 1);
+    const totalPages = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 }

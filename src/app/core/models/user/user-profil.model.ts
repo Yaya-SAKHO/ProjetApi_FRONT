@@ -1,9 +1,6 @@
 export interface User {
   id: string;
-  name: string;
   email: string;
+  name: string;
   role: 'admin' | 'user';
-  isActive?: boolean;
-  createdAt?: Date;
-  configurationsCount?: number;
 }

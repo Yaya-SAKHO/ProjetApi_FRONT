@@ -22,6 +22,38 @@ export class ApiService {
     return this.createRequest<T>('POST', endpoint, body, requireAuth);
   }
 
+  put<T>(endpoint: string, body: any, requireAuth = true): Observable<ApiResponse<T>> {
+    return this.createRequest<T>('PUT', endpoint, body, requireAuth);
+  }
+
+  delete<T>(endpoint: string, requireAuth = true): Observable<ApiResponse<T>> {
+    return this.createRequest<T>('DELETE', endpoint, null, requireAuth);
+  }
+
+  postFormData<T>(endpoint: string, formData: FormData, requireAuth = true): Observable<ApiResponse<T>> {
+    return from(this.prepareFormDataHeaders(requireAuth)).pipe(
+      switchMap(headers => {
+        const url = `${environment.apiUrl}${endpoint}`;
+        return this.http.post<T>(url, formData, { headers }).pipe(
+          map(response => this.mapSuccessResponse<T>(response)),
+          catchError(error => this.handleError<T>(error))
+        );
+      })
+    );
+  }
+
+  putFormData<T>(endpoint: string, formData: FormData, requireAuth = true): Observable<ApiResponse<T>> {
+    return from(this.prepareFormDataHeaders(requireAuth)).pipe(
+      switchMap(headers => {
+        const url = `${environment.apiUrl}${endpoint}`;
+        return this.http.put<T>(url, formData, { headers }).pipe(
+          map(response => this.mapSuccessResponse<T>(response)),
+          catchError(error => this.handleError<T>(error))
+        );
+      })
+    );
+  }
+
   private createRequest<T>(
     method: string,
     endpoint: string,
@@ -37,6 +69,8 @@ export class ApiService {
         switch (method) {
           case 'POST': return this.http.post<T>(url, body, options);
           case 'GET': return this.http.get<T>(url, options);
+          case 'PUT': return this.http.put<T>(url, body, options);
+          case 'DELETE': return this.http.delete<T>(url, options);
           default: throw new Error(`Méthode ${method} non supportée`);
         }
       }),
@@ -45,19 +79,30 @@ export class ApiService {
     );
   }
 
-  private prepareHeaders(requireAuth: boolean): Promise<HttpHeaders> {
-    return new Promise(async (resolve) => {
-      let headers = new HttpHeaders().set('Content-Type', 'application/json');
+  private async prepareHeaders(requireAuth: boolean): Promise<HttpHeaders> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/json');
 
-      if (requireAuth) {
-        const authData = await this.authStorage.getAuthData();
-        if (authData?.token) {
-          headers = headers.set('Authorization', `Bearer ${authData.token}`);
-        }
+    if (requireAuth) {
+      const authData = await this.authStorage.getAuthData();
+      if (authData?.token) {
+        headers = headers.set('Authorization', `Bearer ${authData.token}`);
       }
+    }
 
-      resolve(headers);
-    });
+    return headers;
+  }
+
+  private async prepareFormDataHeaders(requireAuth: boolean): Promise<HttpHeaders> {
+    let headers = new HttpHeaders();
+
+    if (requireAuth) {
+      const authData = await this.authStorage.getAuthData();
+      if (authData?.token) {
+        headers = headers.set('Authorization', `Bearer ${authData.token}`);
+      }
+    }
+
+    return headers;
   }
 
   private mapSuccessResponse<T>(response: any): ApiResponse<T> {
