@@ -18,3 +18,7 @@
       box-shadow: none;
     }
   }
+
+.bg-white {
+    background-color: #5957e7;
+}
