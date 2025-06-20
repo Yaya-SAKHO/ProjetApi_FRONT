@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
 import { ApiResponse } from '../../api/ApiResponse';
 import { Component } from '../../models/component/component.model';
 import { ApiService } from '../api.service';
@@ -12,12 +12,22 @@ import { ComponentFormData } from '../../models/component/component-form-data.mo
 export class ComponentService {
   constructor(private api: ApiService) { }
 
+  getAllComponents(): Observable<ApiResponse<Component[]>> {
+    return this.api.get<Component[]>('/components');
+  }
+
   getComponentsByCategory(categoryName: string): Observable<ApiResponse<Component[]>> {
     return this.api.get<Component[]>(`/components/category/${categoryName}`);
   }
 
   getComponentDetails(id: string): Observable<ApiResponse<Component>> {
-    return this.api.get<Component>(`/components/${id}`);
+    console.log('Fetching component with ID:', id); // Debug
+    if (!id || id === 'undefined') {
+      return throwError(() => new Error('ID de composant invalide'));
+    }
+    return this.api.get<Component>(`/components/${id}`).pipe(
+      tap(response => console.log('API Response:', response)) // Debug
+    );
   }
 
   addComponent(componentData: ComponentFormData): Observable<ApiResponse<Component>> {
@@ -39,7 +49,14 @@ export class ComponentService {
     formData.append('name', data.name);
     formData.append('category', data.category);
     formData.append('brand', data.brand);
-    formData.append('specs', JSON.stringify(data.specs));
+    
+    if (data.specs) {
+      const specs = typeof data.specs === 'string' ? data.specs : JSON.stringify(data.specs);
+      formData.append('specs', specs);
+    } else {
+      formData.append('specs', JSON.stringify({}));
+    }
+    
     if (data.imageFile) {
       formData.append('image', data.imageFile);
     }

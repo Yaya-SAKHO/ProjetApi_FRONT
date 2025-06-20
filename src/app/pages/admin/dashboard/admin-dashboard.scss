@@ -1,0 +1,78 @@
+.dashboard-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .p-card {
+    height: 100%;
+    box-shadow: 0 2px 1px -1px rgba(0,0,0,0.2), 0 1px 1px 0 rgba(0,0,0,0.14), 0 1px 3px 0 rgba(0,0,0,0.12);
+    transition: box-shadow 0.3s ease;
+  
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+  
+    .p-card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  
+    .p-card-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-color-secondary);
+    }
+  
+    .text-4xl {
+      font-size: 2rem;
+      line-height: 2.5rem;
+    }
+  }
+  
+  .p-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  
+    .p-datatable-tbody > tr > td {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  .text-green-500 {
+    color: var(--green-500);
+  }
+  
+  .text-500 {
+    color: var(--text-color-secondary);
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 0.5rem;
+    }
+    
+    .p-card {
+      .p-card-title {
+        font-size: 1rem;
+      }
+      
+      .text-4xl {
+        font-size: 1.5rem;
+      }
+    }
+  }

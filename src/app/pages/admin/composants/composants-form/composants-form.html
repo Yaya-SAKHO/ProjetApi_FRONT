@@ -1,1 +1,139 @@
-<p>composants-form works!</p>
+<!-- composants-form.html -->
+<div class="p-6">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <a routerLink="/admin/composants" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-indigo-600">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+            </svg>
+            Composants
+          </a>
+        </li>
+        <li aria-current="page">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+              {{ isEditMode ? 'Modifier un composant' : 'Ajouter un composant' }}
+            </span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+  
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+  
+    <!-- Formulaire -->
+    <div *ngIf="!isLoading" class="bg-white shadow rounded-lg p-6">
+      <form (ngSubmit)="onSubmit()">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <!-- Colonne gauche -->
+          <div>
+            <!-- Nom -->
+            <div class="mb-4">
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du composant</label>
+              <input type="text" id="name" [(ngModel)]="component.name" name="name" 
+                     class="w-full border rounded-md p-2" required>
+            </div>
+            
+            <!-- Catégorie -->
+            <div class="mb-4">
+              <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+              <select id="category" [(ngModel)]="component.category" name="category" 
+                      class="w-full border rounded-md p-2" required>
+                <option value="">Sélectionnez une catégorie</option>
+                <option *ngFor="let category of categories" [value]="category._id">
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+            
+            <!-- Marque -->
+            <div class="mb-4">
+              <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Marque</label>
+              <input type="text" id="brand" [(ngModel)]="component.brand" name="brand" 
+                     class="w-full border rounded-md p-2" required>
+            </div>
+          </div>
+          
+          <!-- Colonne droite - Image -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+            <div class="mt-1 flex items-center">
+              <div class="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-md overflow-hidden">
+                <div *ngIf="!previewImage" class="absolute inset-0 flex items-center justify-center text-gray-400">
+                  <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <img *ngIf="previewImage" [src]="previewImage" class="w-full h-full object-contain">
+              </div>
+              <div class="ml-4">
+                <input type="file" id="image" name="image" accept="image/*" 
+                       (change)="onFileSelected($event)" class="hidden">
+                <label for="image" class="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  Choisir une image
+                </label>
+                <p class="mt-1 text-xs text-gray-500">PNG, JPG, JPEG jusqu'à 2MB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+<div class="mt-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-medium text-gray-900">Spécifications techniques</h3>
+      <button type="button" (click)="addSpecField()" class="text-sm text-indigo-600 hover:text-indigo-900">
+        + Ajouter une spécification
+      </button>
+    </div>
+    
+    <div *ngIf="component.specs && objectKeys(component.specs).length > 0" class="space-y-4">
+      <div *ngFor="let key of objectKeys(component.specs); trackBy: trackByFn" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <div>
+          <input type="text" [ngModel]="key" (ngModelChange)="updateSpecKey(key, $event)" 
+                 name="specKey_{{key}}" class="w-full border rounded-md p-2" placeholder="Nom de la spécification">
+        </div>
+        <div>
+          <input type="text" [(ngModel)]="component.specs[key]" name="specValue_{{key}}" 
+                 class="w-full border rounded-md p-2" placeholder="Valeur">
+        </div>
+        <div>
+          <button type="button" (click)="removeSpecField(key)" class="text-red-600 hover:text-red-900 text-sm">
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="!component.specs || objectKeys(component.specs).length === 0" class="text-center py-4 bg-gray-50 rounded-md">
+      <p class="text-sm text-gray-500">Aucune spécification technique définie</p>
+    </div>
+  </div>
+        
+        <!-- Boutons de soumission -->
+        <div class="mt-8 flex justify-end space-x-3">
+          <button type="button" routerLink="/admin/composants" 
+                  class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Annuler
+          </button>
+          <button type="submit" [disabled]="isSubmitting" 
+                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+            <span *ngIf="isSubmitting" class="mr-2">
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
