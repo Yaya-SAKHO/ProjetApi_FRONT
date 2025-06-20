@@ -49,14 +49,14 @@ export class ComponentService {
     formData.append('name', data.name);
     formData.append('category', data.category);
     formData.append('brand', data.brand);
-    
+
     if (data.specs) {
       const specs = typeof data.specs === 'string' ? data.specs : JSON.stringify(data.specs);
       formData.append('specs', specs);
     } else {
       formData.append('specs', JSON.stringify({}));
     }
-    
+
     if (data.imageFile) {
       formData.append('image', data.imageFile);
     }

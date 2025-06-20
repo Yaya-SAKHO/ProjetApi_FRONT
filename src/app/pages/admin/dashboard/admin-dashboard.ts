@@ -7,12 +7,11 @@ import { UserService } from '../../../core/services/utilisateurs/utilisateurs';
 import { ConfigurationService } from '../../../core/services/configurations/configuration.service';
 import { PartnerService } from '../../../core/services/partenaires/partner.service';
 import { CategoryService } from '../../../core/services/category/category.service';
-
-import { User } from '../../../core/models/admin/user/user.model';
 import { Configuration } from '../../../core/models/configuration/configuration.model';
 import { Partner } from '../../../core/models/partner/partner.model';
 import { Price } from '../../../core/models/price/price.model';
 import { Category } from '../../../core/models/category/category.model';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-admin-dashboard',

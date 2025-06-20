@@ -1,0 +1,24 @@
+@media print {
+    body * {
+      visibility: hidden;
+    }
+    
+    #summarySection, #summarySection * {
+      visibility: visible;
+    }
+    
+    #summarySection {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      background-color: white;
+      color: black;
+      padding: 20px;
+      box-shadow: none;
+    }
+  }
+
+.bg-white {
+    background-color: #5957e7;
+}

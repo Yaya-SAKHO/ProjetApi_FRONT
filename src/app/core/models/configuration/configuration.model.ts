@@ -1,5 +1,5 @@
-import { Component } from "../component/component.model";
-import { User } from "../admin/user/user.model";
+import {Component } from "../component/component.model";
+import { User } from "../user.model";
 
 export interface Configuration {
   _id: string;
