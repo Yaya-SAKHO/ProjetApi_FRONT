@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { Configuration } from '../../../../core/models/configuration/configuration.model';
-import { User } from '../../../../core/models/admin/user/user.model';
 import { Component as PcComponent } from '../../../../core/models/component/component.model';
 import { ConfigurationService } from '../../../../core/services/configurations/configuration.service';
 import { ApiResponse } from '../../../../core/api/ApiResponse';
 import { PriceService } from '../../../../core/services/price/price.service';
 import { ComponentService } from '../../../../core/services/composants/composants.service';
+import { User } from '../../../../core/models/user.model';
 
 @Component({
   selector: 'app-configuration-detail',
@@ -46,7 +46,7 @@ export class ConfigurationDetail implements OnInit {
       next: (response: ApiResponse<Configuration>) => {
         this.configuration = response.Data || null;
         if (this.configuration) {
-          this.loadComponentDetails(); // ❌ ne pas appeler calculateCostBreakdown ici
+          this.loadComponentDetails();
         }
       },
       error: (err) => {
@@ -68,7 +68,7 @@ export class ConfigurationDetail implements OnInit {
     ).subscribe({
       next: (responses: ApiResponse<PcComponent>[]) => {
         this.componentDetails = responses.map(r => r.Data!);
-        this.calculateCostBreakdown(); // ✅ on l'appelle ici
+        this.calculateCostBreakdown();
       },
       error: (err) => console.error('Erreur chargement composants', err)
     });

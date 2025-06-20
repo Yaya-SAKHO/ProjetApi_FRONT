@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';;
 import { MatSelectModule } from '@angular/material/select';
@@ -8,10 +8,11 @@ import { forkJoin } from 'rxjs';
 import { ComponentService } from '../../../core/services/composants/composants.service';
 import { CategoryService } from '../../../core/services/category/category.service';
 import { Category } from '../../../core/models/category/category.model';
-import { IComponent } from '../../../core/models/component/component.model';
+import { Component as PcComponent } from '../../../core/models/component/component.model';
 import { ApiResponse } from '../../../core/api/ApiResponse';
 import { MatListModule } from '@angular/material/list'
 import { MatIconModule } from '@angular/material/icon'
+import { Component, ElementRef, ViewChild } from '@angular/core';
 
 
 @Component({
@@ -30,8 +31,8 @@ import { MatIconModule } from '@angular/material/icon'
 })
 export class PcBuilder {
   categories: Category[] = [];
-  components: IComponent[] = [];
-  selectedComponents: { [categoryName: string]: IComponent | null } = {};
+  components: PcComponent[] = [];
+  selectedComponents: { [categoryName: string]: PcComponent | null } = {};
   isLoading = true;
   @ViewChild('summarySection') summarySection!: ElementRef;
   constructor(
@@ -68,7 +69,7 @@ export class PcBuilder {
     );
 
     forkJoin(requests$).subscribe({
-      next: (responses: ApiResponse<IComponent[]>[]) => {
+      next: (responses: ApiResponse<PcComponent[]>[]) => {
         console.log('Responses received:', responses);
         this.components = responses
           .filter(res => res.Success && res.Data)
@@ -98,7 +99,7 @@ export class PcBuilder {
     });
   }
 
-  getComponentsByCategory(categoryName: string): IComponent[] {
+  getComponentsByCategory(categoryName: string): PcComponent[] {
     const category = this.categories.find(c => c.name === categoryName);
     if (!category) {
       console.warn(`Catégorie non trouvée: ${categoryName}`);
@@ -110,7 +111,7 @@ export class PcBuilder {
     });
   }
 
-  getCurrentPrice(component: IComponent): number {
+  getCurrentPrice(component: PcComponent): number {
     if (!component?.prices || !Array.isArray(component.prices) || component.prices.length === 0) {
       return 0;
     }
@@ -145,7 +146,7 @@ export class PcBuilder {
 
   objectKeys = Object.keys;
 
-  trackByComponentId(index: number, comp: IComponent): string {
+  trackByComponentId(index: number, comp: PcComponent): string {
     return comp._id;
   }
 }

@@ -1,10 +1,10 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Component as PcComponent } from '../../../core/models/component/component.model';
-import { UserStats } from '../../../core/models/admin/user/user-stats.model';
+
 import { ConfigurationStats } from '../../../core/models/configuration/configuration-stats.model';
 import { PartnerStats } from '../../../core/models/partner/partner-stats.model';
-import { User } from '../../../core/models/admin/user/user.model';
+
 import { Category } from '../../../core/models/category/category.model';
 import { Configuration } from '../../../core/models/configuration/configuration.model';
 import { Partner } from '../../../core/models/partner/partner.model';
@@ -17,6 +17,8 @@ import { PriceService } from '../../../core/services/price/price.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { UserStats } from '../../../core/models/user-stats.model';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-admin-dashboard',

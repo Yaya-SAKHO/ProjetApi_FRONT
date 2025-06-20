@@ -1,7 +1,7 @@
-import { IComponent } from "../component/component.model";
+import { Component } from "../component/component.model";
 
 export interface ConfigurationStats {
     totalConfigurations: number;
     averageComponentsPerConfig: number;
-    mostPopularComponent?: IComponent;
+    mostPopularComponent?: Component;
 }
