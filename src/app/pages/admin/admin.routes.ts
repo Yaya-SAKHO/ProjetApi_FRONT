@@ -60,6 +60,11 @@ export const adminRoutes: Routes = [
           import('./partenaires/partenaires-form/partenaires-form').then(m => m.PartenairesForm)
       },
       {
+        path: 'partenaires/:id',
+        loadComponent: () =>
+          import('./partenaires/partenaires-detail/partenaires-detail').then(m => m.PartenairesDetail)
+      },
+      {
         path: 'partenaires/:id/modifier',
         loadComponent: () =>
           import('./partenaires/partenaires-form/partenaires-form').then(m => m.PartenairesForm)

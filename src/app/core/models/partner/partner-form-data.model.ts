@@ -1,6 +1,7 @@
 export interface PartnerFormData {
     name: string;
-    website?: string; // Ajouté
-    description?: string; // Ajouté
+    website?: string;
+    description?: string;
     imageFile?: File;
+    isActive?: boolean;
 }

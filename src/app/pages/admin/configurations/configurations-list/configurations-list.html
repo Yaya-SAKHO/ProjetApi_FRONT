@@ -1,1 +1,178 @@
-<p>configurations-list works!</p>
+<div class="p-6">
+    <!-- Header avec stats -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Gestion des Configurations</h1>
+        <p *ngIf="stats" class="text-sm text-gray-600">
+          {{ stats.totalConfigurations }} configurations | 
+          {{ stats.averageComponentsPerConfig }} composants/config en moyenne
+        </p>
+      </div>
+      
+      <div class="relative w-64">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="filterConfigurations()"
+          placeholder="Rechercher une configuration..."
+          class="pl-10 pr-4 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+  
+    <!-- Filtres avancés -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Filtre utilisateur -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Utilisateur</label>
+          <select [(ngModel)]="filters.user" (change)="filterConfigurations()" class="w-full border rounded-md p-2">
+            <option value="">Tous les utilisateurs</option>
+            <option *ngFor="let user of configurations | unique:'user'" [value]="typeof user.user === 'string' ? user.user : user.user._id">
+              {{ typeof user.user === 'string' ? user.user : user.user.name }}
+            </option>
+          </select>
+        </div>
+        
+        <!-- Filtre prix -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prix min</label>
+          <input type="number" [(ngModel)]="filters.minPrice" (change)="filterConfigurations()" 
+                 placeholder="€" class="w-full border rounded-md p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prix max</label>
+          <input type="number" [(ngModel)]="filters.maxPrice" (change)="filterConfigurations()" 
+                 placeholder="€" class="w-full border rounded-md p-2">
+        </div>
+        
+        <!-- Bouton reset -->
+        <div class="flex items-end">
+          <button (click)="resetFilters()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md">
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+  
+    <!-- Liste des configurations -->
+    <div *ngIf="!isLoading" class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Composants</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let config of paginatedConfigurations" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-indigo-600">{{ config.name }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div *ngIf="typeof config.user !== 'string'">
+                <div class="text-sm text-gray-900">{{ config.user.name }}</div>
+                <div class="text-sm text-gray-500">{{ config.user.email }}</div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                {{ config.components.length }} composants
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ config.totalCost | currency:'EUR':'symbol':'1.2-2' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ config.createdAt | date: 'dd/MM/yyyy' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex space-x-2">
+                <a [routerLink]="['/admin/configurations', config._id]" 
+                   class="text-indigo-600 hover:text-indigo-900">
+                  Voir
+                </a>
+                <button (click)="deleteConfiguration(config._id)" 
+                        class="text-red-600 hover:text-red-900">
+                  Supprimer
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <!-- Pagination -->
+      <div *ngIf="filteredConfigurations.length > itemsPerPage" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button (click)="currentPage = currentPage - 1"
+                  [disabled]="currentPage === 1"
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Précédent
+          </button>
+          <button (click)="currentPage = currentPage + 1"
+                  [disabled]="currentPage * itemsPerPage >= filteredConfigurations.length"
+                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Suivant
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Affichage de <span class="font-medium">{{ getDisplayRange().start }}</span>
+              à <span class="font-medium">{{ getDisplayRange().end }}</span>
+              sur <span class="font-medium">{{ filteredConfigurations.length }}</span> configurations
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button (click)="currentPage = currentPage - 1"
+                      [disabled]="currentPage === 1"
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Précédent</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <button *ngFor="let page of getPageNumbers()"
+                      (click)="currentPage = page"
+                      [class.bg-indigo-50 border-indigo-500 text-indigo-600]="currentPage === page"
+                      [class.bg-white border-gray-300 text-gray-500 hover:bg-gray-50]="currentPage !== page"
+                      class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                {{ page }}
+              </button>
+              <button (click)="currentPage = currentPage + 1"
+                      [disabled]="currentPage * itemsPerPage >= filteredConfigurations.length"
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Suivant</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredConfigurations.length === 0" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune configuration trouvée</h3>
+        <p class="mt-1 text-sm text-gray-500">Essayez de modifier vos filtres de recherche</p>
+      </div>
+    </div>
+  </div>
