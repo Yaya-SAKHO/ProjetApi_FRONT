@@ -1,8 +1,33 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+}
+
+.menu a,
+.menu button {
+  color: white;
+  font-weight: 500;
+  margin-left: 8px;
+  text-transform: none;
+}
+
+.menu a.active {
+  border-bottom: 2px solid white;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
 .content {
-    padding: 16px;
-  }
-  
-  .spacer {
-    flex: 1 1 auto;
-  }
-  
+  padding: 32px;
+  background: #f4f6fa;
+  min-height: calc(100vh - 64px); /* Adjust for toolbar height */
+}

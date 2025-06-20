@@ -23,7 +23,7 @@ import { IComponent } from '../../../core/models/user/component';
 export class PcBuilder {
   categories: string[] = [];
   components: IComponent[] = [];
-  selectedComponents: { [category: string]: Component | null } = {};
+  selectedComponents: { [category: string]: IComponent | null } = {};
   isLoading = true;
   objectKeys = Object.keys;
   constructor(
@@ -32,50 +32,62 @@ export class PcBuilder {
   ) {}
 
   ngOnInit(): void {
-   // this.loadCategories();
+    this.loadCategories();
   }
 
-  // loadCategories(): void {
-  //   this.categoryService.getAllCategories().subscribe({
-  //     next: (categories) => {
-  //       this.categories = categories.map(c => c.name);
-  //       this.loadAllComponents();
-  //     },
-  //     error: (err) => {
-  //       console.error('Error loading categories', err);
-  //       this.isLoading = false;
-  //     }
-  //   });
-  // }
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe({
+      next: (categories) => {
+        console.log("ekjeef",categories)
+        this.categories = categories.map(c => c.name);
+        this.loadAllComponents();
+      },
+      error: (err) => {
+        console.error('Error loading categories', err);
+        this.isLoading = false;
+      }
+    });
+  }
 
-  // loadAllComponents(): void {
-  //   const requests = this.categories.map(category => 
-  //     this.componentService.getComponentsByCategory(category)
-  //   );
-
-  //   forkJoin(requests).subscribe({
-  //     next: (results) => {
-  //       this.components = results.flat();
-  //       this.isLoading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error loading components', err);
-  //       this.isLoading = false;
-  //     }
-  //   });
-  // }
-
-  // getComponentsByCategory(category: string): IComponent[] {
-  //   return this.components.filter(c => c.category === category);
-  // }
+  loadAllComponents(): void {
+    const requests = this.categories.map(category => 
+      this.componentService.getComponentsByCategory(category)
+    );
+    console.log("on a====================== UOI / ",this.components)
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        this.components = results.flat();
+        
   
-  // getTotal(): number {
-  //   return Object.values(this.selectedComponents)
-  //     .filter(comp => !!comp)
-  //     .reduce((sum, comp: IComponent) => sum + (comp.price || 0), 0);
-  // }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading components', err);
+        this.isLoading = false;
+      }
+    });
+  }
+  asComponent(value: any): IComponent {
+    return value as IComponent;
+  }
   
-  // saveConfiguration(): void {
-  //   console.log('Configuration sauvegardée :', this.selectedComponents);
-  // }
+  getComponentsByCategory(category: string): IComponent[] {
+    return this.components.filter(c => c.category === category);
+  }
+  
+  private isIComponent(comp: any): comp is IComponent {
+    return comp && 
+           typeof comp.price === 'number' && 
+           typeof comp.brand === 'string';
+  }
+  
+  getTotal(): number {
+    return Object.values(this.selectedComponents)
+      .filter(this.isIComponent)
+      .reduce((sum, comp) => sum + comp?.price!, 0);
+  }
+  
+  saveConfiguration(): void {
+    console.log('Configuration sauvegardée :', this.selectedComponents);
+  }
 }

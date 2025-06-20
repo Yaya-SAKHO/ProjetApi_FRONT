@@ -7,7 +7,7 @@ import { Category } from '../core/models/user/category';
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = 'http://localhost:5000/api/category';
+  private apiUrl = 'http://localhost:5000/api/categories';
   constructor(private http: HttpClient) { }
 
   getAllCategories(): Observable<Category[]> {

@@ -1,4 +1,4 @@
-<!-- <h2>Configurer mon PC</h2>
+<h2>Configurer mon PC</h2>
 
 <div *ngIf="isLoading">
   <p>Chargement des composants...</p>
@@ -25,19 +25,14 @@
       </mat-form-field>
 
      
-      <div *ngIf="selectedComponents[category] as selected">
-        <p><strong>Marque :</strong> {{ selected.brand }}</p>
-
-        <p *ngFor="let specKey of objectKeys(selected.specs || {})">
-          <strong>{{ specKey }} :</strong> {{ selected.specs[specKey] }}
-        </p>
-
-        <img
-          *ngIf="selected.image?.data"
-          [src]="'data:' + selected.image.contentType + ';base64,' + selected.image.data"
-          alt="{{ selected.name }}"
-          width="150"
-        />
+      <div *ngIf="selectedComponents[category] as rawSelected">
+        <ng-container *ngIf="asComponent(rawSelected) as selected">
+          <p><strong>Marque :</strong> {{ selected.brand }}</p>
+      
+          <p *ngFor="let specKey of objectKeys(selected.specs || {})">
+            <strong>{{ specKey }} :</strong> {{ selected.specs[specKey] }}
+          </p>
+        </ng-container>
       </div>
     </mat-card>
   </ng-container>
@@ -48,4 +43,4 @@
       Sauvegarder ma configuration
     </button>
   </mat-card>
-</div> -->
+</div>
