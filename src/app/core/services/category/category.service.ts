@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../api.service';
-import { Category } from '../../../models/admin/category/category.model';
-import { ApiResponse } from '../../../api/ApiResponse';
+import { ApiService } from '../api.service';
+import { Category } from '../../models/category/category.model';
+import { ApiResponse } from '../../api/ApiResponse';
 
 
 @Injectable({

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
-import { ApiService } from '../../api.service';
-import { ApiResponse } from '../../../api/ApiResponse';
-import { User } from '../../../models/admin/user/user.model';
-import { UserStats } from '../../../models/admin/user/user-stats.model';
+import { ApiService } from '../api.service';
+import { ApiResponse } from '../../api/ApiResponse';
+import { User } from '../../models/admin/user/user.model';
+import { UserStats } from '../../models/admin/user/user-stats.model';
 
 @Injectable({
   providedIn: 'root'

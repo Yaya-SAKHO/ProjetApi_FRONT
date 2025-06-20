@@ -4,10 +4,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
 import { finalize } from 'rxjs';
-import { Configuration } from '../../../../core/models/admin/configuration/configuration.model';
+import { Configuration } from '../../../../core/models/configuration/configuration.model';
 import { User } from '../../../../core/models/admin/user/user.model';
-import { ConfigurationService } from '../../../../core/services/admin/configurations/configuration.service';
-import { UserService } from '../../../../core/services/admin/utilisateurs/utilisateurs';
+import { ConfigurationService } from '../../../../core/services/configurations/configuration.service';
+import { UserService } from '../../../../core/services/utilisateurs/utilisateurs';
 import { ApiResponse } from '../../../../core/api/ApiResponse';
 
 @Component({

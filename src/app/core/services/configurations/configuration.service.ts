@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../../api.service';
-import { Configuration } from '../../../models/admin/configuration/configuration.model';
-import { ApiResponse } from '../../../api/ApiResponse';
-import { ConfigurationStats } from '../../../models/admin/configuration/configuration-stats.model';
+import { ApiService } from '../api.service';
+import { Configuration } from '../../models/configuration/configuration.model';
+import { ApiResponse } from '../../api/ApiResponse';
+import { ConfigurationStats } from '../../models/configuration/configuration-stats.model';
 
 
 @Injectable({
