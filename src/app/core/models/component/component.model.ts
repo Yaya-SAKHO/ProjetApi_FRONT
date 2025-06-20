@@ -2,7 +2,7 @@ import { Category } from "../category/category.model";
 import { Price } from "../price/price.model";
 import { ComponentSpecs } from "./component-specs.model";
 
-export interface Component {
+export interface IComponent {
     _id: string;
     name: string;
     category: Category | string;

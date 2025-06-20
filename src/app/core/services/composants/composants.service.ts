@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../api/ApiResponse';
-import { Component } from '../../models/component/component.model';
+import { IComponent } from '../../models/component/component.model';
 import { ApiService } from '../api.service';
 import { ComponentFormData } from '../../models/component/component-form-data.model';
 
@@ -12,22 +12,23 @@ import { ComponentFormData } from '../../models/component/component-form-data.mo
 export class ComponentService {
   constructor(private api: ApiService) { }
 
-  getComponentsByCategory(categoryName: string): Observable<ApiResponse<Component[]>> {
-    return this.api.get<Component[]>(`/components/category/${categoryName}`);
+  getComponentsByCategory(categoryName: string): Observable<ApiResponse<IComponent[]>> {
+
+    return this.api.get<IComponent[]>(`/components/category/${categoryName}`);
   }
 
-  getComponentDetails(id: string): Observable<ApiResponse<Component>> {
-    return this.api.get<Component>(`/components/${id}`);
+  getIComponentDetails(id: string): Observable<ApiResponse<IComponent>> {
+    return this.api.get<IComponent>(`/components/${id}`);
   }
 
-  addComponent(componentData: ComponentFormData): Observable<ApiResponse<Component>> {
+  addComponent(componentData: ComponentFormData): Observable<ApiResponse<IComponent>> {
     const formData = this.createFormData(componentData);
-    return this.api.postFormData<Component>('/components', formData);
+    return this.api.postFormData<IComponent>('/components', formData);
   }
 
-  updateComponent(id: string, componentData: ComponentFormData): Observable<ApiResponse<Component>> {
+  updateComponent(id: string, componentData: ComponentFormData): Observable<ApiResponse<IComponent>> {
     const formData = this.createFormData(componentData);
-    return this.api.putFormData<Component>(`/components/${id}`, formData);
+    return this.api.putFormData<IComponent>(`/components/${id}`, formData);
   }
 
   deleteComponent(id: string): Observable<ApiResponse<void>> {

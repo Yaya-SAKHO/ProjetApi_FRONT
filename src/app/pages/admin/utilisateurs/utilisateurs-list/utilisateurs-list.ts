@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
-import { User } from '../../../../core/models/admin/user/user.model';
+import { User } from '../../../../core/models/user.model';
 import { UserService } from '../../../../core/services/utilisateurs/utilisateurs';
 import { ApiResponse } from '../../../../core/api/ApiResponse';
 
