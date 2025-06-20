@@ -30,6 +30,9 @@ export class PriceService {
     return this.api.put<Price>('/prices', priceData);
   }
 
+  getPricesByPartner(partnerId: string): Observable<ApiResponse<Price[]>> {
+    return this.api.get<Price[]>(`/prices/partner/${partnerId}`);
+  }
 //   deletePrice(partnerId: string, componentId: string): Observable<ApiResponse<void>> {
 //     return this.api.delete<void>('/prices', {
 //       params: { partnerId, componentId }

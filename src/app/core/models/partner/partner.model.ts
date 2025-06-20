@@ -1,5 +1,6 @@
 export interface Partner {
-    _id: string;
+    id: string;
+    _id?: string;
     name: string;
     website?: string; // Nouveau champ
     description?: string; // Nouveau champ

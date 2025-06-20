@@ -1,1 +1,240 @@
-<p>partenaires-list works!</p>
+<div class="partners-container bg-gray-50 p-6 min-h-screen">
+    <!-- Header avec boutons et recherche -->
+    <div class="header flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">Gestion des Partenaires</h1>
+        <p class="text-gray-600 mt-2">Liste complète de tous vos partenaires commerciaux</p>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        <a routerLink="/admin/partenaires/nouveau" 
+           class="btn-primary flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Nouveau partenaire
+        </a>
+        
+        <div class="search-box relative flex-grow max-w-md">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="filterPartners()"
+            placeholder="Rechercher un partenaire..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+          >
+          <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Statistiques rapides -->
+    <div class="stats-grid grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="stat-card bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-500">Total partenaires</h3>
+        <p class="text-2xl font-semibold text-indigo-600">{{ filteredPartners.length }}</p>
+      </div>
+      <div class="stat-card bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-500">Partenaires actifs</h3>
+        <p class="text-2xl font-semibold text-green-600">
+          {{ activePartnersCount }}
+        </p>
+      </div>
+      <div class="stat-card bg-white p-4 rounded-lg shadow">
+        <h3 class="text-sm font-medium text-gray-500">Moyenne prix/partenaire</h3>
+        <p class="text-2xl font-semibold text-purple-600">-</p>
+      </div>
+    </div>
+  
+    <!-- Tableau des partenaires -->
+    <div class="bg-white shadow overflow-hidden rounded-lg">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p class="mt-3 text-gray-600">Chargement des partenaires...</p>
+      </div>
+  
+      <!-- Table -->
+      <ng-container *ngIf="!isLoading">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Logo & Nom
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Informations
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Statut
+                </th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let partner of paginatedPartners" class="hover:bg-gray-50 transition">
+                <!-- Colonne Logo & Nom -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12">
+                      <img *ngIf="partner.image" 
+                          [src]="partner.image" 
+                          alt="Logo" 
+                          class="h-12 w-12 rounded-full object-cover border border-gray-200">
+                      <div *ngIf="!partner.image" class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
+                        <span class="text-gray-400 text-xl font-medium">{{ partner.name | initials }}</span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ partner.name }}</div>
+                      <div class="text-sm text-gray-500">Créé le {{ partner.createdAt | date:'dd/MM/yyyy' }}</div>
+                    </div>
+                  </div>
+                </td>
+    
+                <!-- Colonne Informations -->
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">
+                    <a *ngIf="partner.website" [href]="partner.website" target="_blank" class="text-indigo-600 hover:text-indigo-900 flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                      </svg>
+                      {{ partner.website | truncate:30 }}
+                    </a>
+                    <span *ngIf="!partner.website" class="text-gray-400 italic">Aucun site web</span>
+                  </div>
+                  <div class="text-sm text-gray-500 mt-1">
+                    {{ (partner.description || 'Aucune description') | truncate:50 }}
+                  </div>
+                </td>
+    
+                <!-- Colonne Statut -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                        [ngClass]="{
+                          'bg-green-100 text-green-800': partner.isActive,
+                          'bg-red-100 text-red-800': !partner.isActive
+                        }">
+                    {{ partner.isActive ? 'Actif' : 'Inactif' }}
+                  </span>
+                  <div class="text-xs text-gray-500 mt-1">
+                    {{ partner.priceCount || 0 }} prix référencés
+                  </div>
+                </td>
+    
+                <!-- Colonne Actions -->
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-2">
+                    <a [routerLink]="['/admin/partenaires', partner.id]" 
+                      class="action-btn text-indigo-600 hover:text-indigo-900"
+                      title="Voir détails">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </a>
+                    
+                    <a [routerLink]="['/admin/partenaires', partner.id, 'modifier']" 
+                      class="action-btn text-gray-600 hover:text-gray-900"
+                      title="Modifier">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </a>
+    
+                    <button (click)="togglePartnerStatus(partner)"
+                      [class.text-green-600]="!partner.isActive"
+                      [class.text-red-600]="partner.isActive"
+                      class="action-btn"
+                      [title]="partner.isActive ? 'Désactiver' : 'Activer'">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          [attr.d]="partner.isActive ? 'M18.364 5.636l-12.728 12.728M6.364 5.636l12.728 12.728' : 'M5 13l4 4L19 7'" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+  
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredPartners.length === 0" class="empty-state text-center py-12">
+        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun partenaire trouvé</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          {{ searchTerm ? 'Aucun résultat pour votre recherche.' : 'Commencez par ajouter votre premier partenaire.' }}
+        </p>
+        <div class="mt-6">
+          <a routerLink="/admin/partenaires/nouveau" class="btn-primary inline-flex items-center">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Ajouter un partenaire
+          </a>
+        </div>
+      </div>
+  
+      <!-- Pagination -->
+      <div *ngIf="filteredPartners.length > itemsPerPage" class="pagination bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button (click)="currentPage = currentPage - 1"
+            [disabled]="currentPage === 1"
+            class="pagination-btn">
+            Précédent
+          </button>
+          <button (click)="currentPage = currentPage + 1"
+            [disabled]="currentPage * itemsPerPage >= filteredPartners.length"
+            class="pagination-btn ml-3">
+            Suivant
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Affichage de <span class="font-medium">{{ getDisplayRange().start }}</span>
+              à <span class="font-medium">{{ getDisplayRange().end }}</span>
+              sur <span class="font-medium">{{ filteredPartners.length }}</span> partenaires
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button (click)="currentPage = currentPage - 1"
+                [disabled]="currentPage === 1"
+                class="pagination-arrow">
+                <span class="sr-only">Précédent</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              
+              <button *ngFor="let page of getPageNumbers()"
+                (click)="currentPage = page"
+                [class.current-page]="currentPage === page"
+                class="pagination-number">
+                {{ page }}
+              </button>
+              
+              <button (click)="currentPage = currentPage + 1"
+                [disabled]="currentPage * itemsPerPage >= filteredPartners.length"
+                class="pagination-arrow">
+                <span class="sr-only">Suivant</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

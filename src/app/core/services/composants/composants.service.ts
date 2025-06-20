@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
 import { ApiResponse } from '../../api/ApiResponse';
-import { IComponent } from '../../models/component/component.model';
+import { Component } from '../../models/component/component.model';
 import { ApiService } from '../api.service';
 import { ComponentFormData } from '../../models/component/component-form-data.model';
 
@@ -12,23 +12,32 @@ import { ComponentFormData } from '../../models/component/component-form-data.mo
 export class ComponentService {
   constructor(private api: ApiService) { }
 
-  getComponentsByCategory(categoryName: string): Observable<ApiResponse<IComponent[]>> {
-
-    return this.api.get<IComponent[]>(`/components/category/${categoryName}`);
+  getAllComponents(): Observable<ApiResponse<Component[]>> {
+    return this.api.get<Component[]>('/components');
   }
 
-  getIComponentDetails(id: string): Observable<ApiResponse<IComponent>> {
-    return this.api.get<IComponent>(`/components/${id}`);
+  getComponentsByCategory(categoryName: string): Observable<ApiResponse<Component[]>> {
+    return this.api.get<Component[]>(`/components/category/${categoryName}`);
   }
 
-  addComponent(componentData: ComponentFormData): Observable<ApiResponse<IComponent>> {
+  getComponentDetails(id: string): Observable<ApiResponse<Component>> {
+    console.log('Fetching component with ID:', id); // Debug
+    if (!id || id === 'undefined') {
+      return throwError(() => new Error('ID de composant invalide'));
+    }
+    return this.api.get<Component>(`/components/${id}`).pipe(
+      tap(response => console.log('API Response:', response)) // Debug
+    );
+  }
+
+  addComponent(componentData: ComponentFormData): Observable<ApiResponse<Component>> {
     const formData = this.createFormData(componentData);
-    return this.api.postFormData<IComponent>('/components', formData);
+    return this.api.postFormData<Component>('/components', formData);
   }
 
-  updateComponent(id: string, componentData: ComponentFormData): Observable<ApiResponse<IComponent>> {
+  updateComponent(id: string, componentData: ComponentFormData): Observable<ApiResponse<Component>> {
     const formData = this.createFormData(componentData);
-    return this.api.putFormData<IComponent>(`/components/${id}`, formData);
+    return this.api.putFormData<Component>(`/components/${id}`, formData);
   }
 
   deleteComponent(id: string): Observable<ApiResponse<void>> {
@@ -40,7 +49,14 @@ export class ComponentService {
     formData.append('name', data.name);
     formData.append('category', data.category);
     formData.append('brand', data.brand);
-    formData.append('specs', JSON.stringify(data.specs));
+
+    if (data.specs) {
+      const specs = typeof data.specs === 'string' ? data.specs : JSON.stringify(data.specs);
+      formData.append('specs', specs);
+    } else {
+      formData.append('specs', JSON.stringify({}));
+    }
+
     if (data.imageFile) {
       formData.append('image', data.imageFile);
     }

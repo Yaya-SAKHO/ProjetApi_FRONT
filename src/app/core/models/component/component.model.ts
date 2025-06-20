@@ -4,6 +4,7 @@ import { ComponentSpecs } from "./component-specs.model";
 
 export interface IComponent {
     _id: string;
+    id?: string;
     name: string;
     category: Category | string;
     brand: string;
@@ -13,4 +14,5 @@ export interface IComponent {
         contentType: string;
     };
     prices?: Price[];
+    imageUrl?: string;
 }

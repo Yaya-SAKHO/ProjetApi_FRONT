@@ -1,1 +1,151 @@
-<p>partenaires-form works!</p>
+<div class="partner-form-container bg-gray-50 p-6 min-h-screen">
+    <!-- Breadcrumb amélioré -->
+    <nav class="breadcrumb mb-6">
+      <ol class="flex items-center space-x-2 text-sm">
+        <li>
+          <a routerLink="/admin/partenaires" class="text-indigo-600 hover:text-indigo-900 flex items-center">
+            <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+            </svg>
+            Partenaires
+          </a>
+        </li>
+        <li class="text-gray-500">/</li>
+        <li class="text-gray-500">
+          {{ isEditMode ? 'Modifier' : 'Créer' }} un partenaire
+        </li>
+      </ol>
+    </nav>
+  
+    <!-- En-tête du formulaire -->
+    <div class="form-header mb-8">
+      <h2 class="text-2xl font-bold text-gray-800">
+        {{ isEditMode ? 'Modifier le partenaire' : 'Nouveau partenaire' }}
+      </h2>
+      <p class="text-gray-600 mt-1">
+        {{ isEditMode ? 'Mettez à jour les informations de ce partenaire' : 'Renseignez les informations du nouveau partenaire' }}
+      </p>
+    </div>
+  
+    <!-- Formulaire -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <form (ngSubmit)="onSubmit()" class="p-6">
+        <!-- Grille responsive -->
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <!-- Colonne gauche - Champs texte -->
+          <div class="space-y-6">
+            <!-- Nom -->
+            <div class="form-group">
+              <label for="name" class="form-label">
+                Nom du partenaire <span class="text-red-500">*</span>
+              </label>
+              <input type="text" id="name" name="name" [(ngModel)]="partner.name" required
+                     class="form-input"
+                     placeholder="Ex: Amazon, LDLC, etc.">
+            </div>
+            
+            <!-- Site web -->
+            <div class="form-group">
+              <label for="website" class="form-label">Site web</label>
+              <div class="relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-500">https://</span>
+                </div>
+                <input type="url" id="website" name="website" [(ngModel)]="partner.website"
+                       class="form-input pl-16"
+                       placeholder="votresite.com">
+              </div>
+            </div>
+            
+            <!-- Description -->
+            <div class="form-group">
+              <label for="description" class="form-label">Description</label>
+              <textarea id="description" name="description" [(ngModel)]="partner.description" rows="3"
+                        class="form-input"
+                        placeholder="Une brève description du partenaire..."></textarea>
+            </div>
+            
+            <!-- Statut -->
+            <div class="form-group">
+              <label class="form-label">Statut</label>
+              <div class="mt-1 flex items-center">
+                <div class="relative flex items-start">
+                  <div class="flex items-center h-5">
+                    <input type="checkbox" id="isActive" name="isActive" [(ngModel)]="partner.isActive"
+                           class="form-checkbox h-4 w-4 text-indigo-600 transition">
+                  </div>
+                  <div class="ml-3">
+                    <label for="isActive" class="text-sm text-gray-700">
+                      Partenaire actif
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1">
+                      {{ partner.isActive ? 'Ce partenaire est visible' : 'Ce partenaire est masqué' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Colonne droite - Upload image -->
+          <div>
+            <div class="form-group">
+              <label class="form-label">Logo du partenaire</label>
+              <p class="text-xs text-gray-500 mb-3">Format recommandé : PNG ou JPG (300x300px)</p>
+              
+              <!-- Zone de drop -->
+              <div class="image-upload-container border-2 border-dashed border-gray-300 rounded-lg p-6 text-center"
+                   (dragover)="onDragOver($event)" 
+                   (drop)="onDrop($event)"
+                   (dragleave)="onDragLeave($event)">
+                <div *ngIf="!previewImage" class="empty-state">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <h4 class="mt-2 text-sm font-medium text-gray-700">
+                    Glissez-déposez votre image ici
+                  </h4>
+                  <p class="mt-1 text-xs text-gray-500">
+                    ou cliquez pour sélectionner un fichier
+                  </p>
+                  <input type="file" id="fileInput" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+                  <label for="fileInput" class="btn-secondary mt-4 inline-block">
+                    Sélectionner une image
+                  </label>
+                </div>
+                
+                <!-- Aperçu de l'image -->
+                <div *ngIf="previewImage" class="preview-container relative">
+                  <img [src]="previewImage" alt="Aperçu du logo" class="mx-auto max-h-48 rounded-md object-contain">
+                  <button type="button" (click)="removeImage()"
+                          class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+           
+          </div>
+        </div>
+        
+        <!-- Actions du formulaire -->
+        <div class="form-actions mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
+          <button type="button" routerLink="/admin/partenaires"
+                  class="btn-cancel">
+            Annuler
+          </button>
+          <button type="submit" [disabled]="isSubmitting"
+                  class="btn-submit">
+            <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isSubmitting ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer le partenaire') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>

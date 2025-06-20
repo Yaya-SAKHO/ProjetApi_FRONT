@@ -30,6 +30,27 @@ export class ApiService {
     return this.createRequest<T>('DELETE', endpoint, null, requireAuth);
   }
 
+  getBlob(endpoint: string, requireAuth = true): Observable<Blob> {
+    return from(this.prepareHeaders(requireAuth)).pipe(
+      switchMap(headers => {
+        const url = `${environment.apiUrl}${endpoint}`;
+        return this.http.get(url, { 
+          headers,
+          responseType: 'blob' 
+        });
+      }),
+      catchError(error => {
+        const apiError = {
+          code: error.error?.code || 'HTTP_ERROR',
+          message: error.error?.message || error.message,
+          details: error.error?.details || JSON.stringify(error),
+          timeStamp: new Date().toISOString()
+        };
+        throw apiError;
+      })
+    );
+  }
+
   postFormData<T>(endpoint: string, formData: FormData, requireAuth = true): Observable<ApiResponse<T>> {
     return from(this.prepareFormDataHeaders(requireAuth)).pipe(
       switchMap(headers => {

@@ -5,7 +5,6 @@ import { Configuration } from '../../models/configuration/configuration.model';
 import { ApiResponse } from '../../api/ApiResponse';
 import { ConfigurationStats } from '../../models/configuration/configuration-stats.model';
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -32,11 +31,9 @@ export class ConfigurationService {
     return this.api.delete<void>(`/configurations/${id}`);
   }
 
-  // exportToPDF(id: string): Observable<ApiResponse<Blob>> {
-  //   return this.api.get<Blob>(`/configurations/${id}/export-pdf`, {
-  //     responseType: 'blob'
-  //   });
-  // }
+  exportToPDF(id: string): Observable<Blob> {
+    return this.api.getBlob(`/configurations/${id}/export-pdf`);
+  }
 
   getConfigurationsWithUserDetails(): Observable<ApiResponse<Configuration[]>> {
     return this.api.get<Configuration[]>('/configurations');
